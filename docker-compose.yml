@@ -1,0 +1,43 @@
+version: '3'
+
+services: 
+    communication_service:
+#        container_name: 'comm'
+        build: ./Comm/
+        ports:
+            - 8080:8080
+        restart: always
+
+    mongodb_container:
+        image: mongo
+        restart: always
+#        container_name: 'mongodb-container'
+#        volumes:
+#            - mongodb_rating_data:/data/db
+#        ports:
+#            - 27018:27017
+
+    ride_service:
+#        container_name: 'Ride-service'
+        build: ./RideMatch/
+        restart: always
+        depends_on:
+            - communication_service
+    rate_service:
+#        container_name: 'Rating-service'
+        build: ./Rate/
+        restart: always
+        depends_on:
+            - mongodb_container
+
+    nginx:
+#        container_name: 'nginx-service'
+        build: ./nginx/
+        ports:
+            - 10000:80
+        depends_on:
+            - ride_service
+            - rate_service
+
+#volumes:
+#    mongodb_rating_data:
