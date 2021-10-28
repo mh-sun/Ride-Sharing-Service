@@ -1,43 +1,85 @@
 version: '3'
 
+networks:
+    bdnet:
+        ipam:
+            config:
+                - subnet: 10.100.0.0/24
+
 services: 
-    communication_service:
-#        container_name: 'comm'
+    communication_service_dhaka:
         build: ./Comm/
-        ports:
-            - 8080:8080
         restart: always
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.3
+
+    communication_service_chittagong:
+        build: ./Comm/
+        restart: always
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.30
 
     mongodb_container:
         image: mongo
         restart: always
-#        container_name: 'mongodb-container'
 #        volumes:
 #            - mongodb_rating_data:/data/db
-#        ports:
-#            - 27018:27017
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.5
 
-    ride_service:
-#        container_name: 'Ride-service'
+    ride_service_dhaka:
         build: ./RideMatch/
         restart: always
         depends_on:
-            - communication_service
+            - communication_service_dhaka
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.2
+
+    ride_service_chittagong:
+        build: ./RideMatch/
+        restart: always
+        depends_on:
+            - communication_service_chittagong
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.20
+
     rate_service:
-#        container_name: 'Rating-service'
         build: ./Rate/
         restart: always
         depends_on:
             - mongodb_container
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.4
 
-    nginx:
-#        container_name: 'nginx-service'
+    nginx_dhaka:
         build: ./nginx/
-        ports:
-            - 10000:80
+        environment:
+            - ride_service=ride_service_dhaka
+        command: /bin/sh -c "envsubst < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"
         depends_on:
-            - ride_service
+            - ride_service_dhaka
             - rate_service
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.10
+
+    nginx_chittagong:
+        build: ./nginx/
+        environment:
+            - ride_service=ride_service_chittagong
+        command: /bin/sh -c "envsubst < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"
+        depends_on:
+            - ride_service_chittagong
+            - rate_service
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.100
 
 #volumes:
 #    mongodb_rating_data:

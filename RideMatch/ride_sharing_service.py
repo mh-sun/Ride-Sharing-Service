@@ -36,7 +36,11 @@ def client_match():
         print("Server has paired rider %s with driver %s" %
               (rider['name'], sel_driver['name']))
         print("message sending to comm :", notification)
-        requests.post("http://communication_service:8080/comm", json=notification)
+
+        if rider['loc'][0] < 51:
+            requests.post("http://communication_service_dhaka:8080/comm", json=notification)
+        else:
+            requests.post("http://communication_service_chittagong:8080/comm", json=notification)
 
         avail_rider.remove(rider)
         avail_driver.remove(sel_driver)

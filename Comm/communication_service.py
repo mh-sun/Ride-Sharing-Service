@@ -12,7 +12,8 @@ sio = SocketIO(app)
 @app.route("/comm", methods=["POST"])
 def send_pair():
     info = request.json
-    print("message received from ride :", info)
+    print("message received from ride-share :", info)
+    print('Sendind data to client')
     sio.emit("notify", info)
     return "Communication received from ride share"
 

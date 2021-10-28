@@ -6,12 +6,12 @@ import eventlet
 
 eventlet.monkey_patch()
 sio = socketio.Client()
-sio.connect("http://127.0.0.1:8080")
+sio.connect('http://communication.cht.com:8080')
 
 
 def get_location():
-    a = random.randint(0, 100)
-    b = random.randint(0, 100)
+    a = random.randint(51, 100)
+    b = random.randint(51, 100)
     temp = [a, b]
 
     return temp
@@ -58,14 +58,15 @@ def send_rating(r_name, d_name):
         "dname": d_name,
         "rate": rate
     }
-    print('SENDING TO RATING SERVICE', rate_req)
-    requests.post("http://127.0.0.1:10000/rating", json=rate_req)
+    print('sending to rating service', rate_req)
+    requests.post("http://chittagong.server.com:80/rating", json=rate_req)
 
 
 @sio.event()
 def notify(data):
     store_rider(data['r_name'])
     store_driver(data['d_name'])
+    print('Data received from communication')
     print("%s Have to give %s %d TAKA " %
           (data['r_name'], data['d_name'], data['fare']))
     send_rating(data['r_name'], data['d_name'])
@@ -101,8 +102,9 @@ while True:
         "car": d[1],
         "loc": get_location()
     }
-
-    requests.post("http://127.0.0.1:10000/api/rider", json=rider_req)
-    requests.post("http://127.0.0.1:10000/api/driver", json=driver_req)
+    # print('Sending rider info to Ride_share\n')
+    requests.post("http://chittagong.server.com:80/api/rider", json=rider_req)
+    # print('Sending Driver info to Ride_share\n')
+    requests.post("http://chittagong.server.com:80/api/driver", json=driver_req)
 
     time.sleep(2)
