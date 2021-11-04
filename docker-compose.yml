@@ -6,7 +6,21 @@ networks:
             config:
                 - subnet: 10.100.0.0/24
 
-services: 
+services:
+    redis_container_dhaka:
+        image: redis
+        restart: always
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.6
+
+    redis_container_chittagong:
+        image: redis
+        restart: always
+        networks:
+            bdnet:
+                ipv4_address: 10.100.0.60
+
     communication_service_dhaka:
         build: ./Comm/
         restart: always
@@ -35,6 +49,7 @@ services:
         restart: always
         depends_on:
             - communication_service_dhaka
+            - redis_container_dhaka
         networks:
             bdnet:
                 ipv4_address: 10.100.0.2
@@ -44,6 +59,7 @@ services:
         restart: always
         depends_on:
             - communication_service_chittagong
+            - redis_container_chittagong
         networks:
             bdnet:
                 ipv4_address: 10.100.0.20
